@@ -9,6 +9,7 @@ const { registerPlannerIpc } = require('./ipc/planner.cjs');
 const { registerRenderIpc } = require('./ipc/render.cjs');
 const ffmpeg = require('./services/ffmpeg.cjs');
 const settings = require('./services/settings.cjs'); const mediaEngine = require('./services/mediaEngine.cjs');
+const appLogger = require('./services/appLogger.cjs');
 
 protocol.registerSchemesAsPrivileged([{ scheme: 'savana-media', privileges: { secure: true, standard: true, stream: true, supportFetchAPI: true } }]);
 
@@ -18,11 +19,13 @@ function createWindow() {
     titleBarStyle: 'hidden', titleBarOverlay: { color: '#111318', symbolColor: '#aeb4c0', height: 42 },
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true }
   });
+  appLogger.attach(win);
   if (!app.isPackaged) win.loadURL('http://localhost:5174');
   else win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
 }
 
 app.whenReady().then(async () => {
+  appLogger.configure(app);
   ffmpeg.configure(app);
   mediaEngine.setCustom(await settings.load(app));
   protocol.handle('savana-media', request => {

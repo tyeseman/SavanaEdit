@@ -10,6 +10,8 @@
 | Ctrl+Z | Undo timeline edit |
 | Ctrl+Shift+Z | Redo timeline edit |
 | Ctrl+B | Split selected clips at playhead |
+| B | Toggle Blade and Selection tools |
+| Home | Return playhead and timeline view to the beginning |
 | Ctrl+C | Copy selected clips |
 | Ctrl+V | Paste clips at playhead |
 | Delete | Delete selected clips |
