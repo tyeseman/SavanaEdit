@@ -1,0 +1,23 @@
+node_modules/
+dist/
+dist-electron/
+release/
+build/
+.cache/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+Thumbs.db
+.DS_Store
+SavanaEdit cache/
+thumbnails/
+waveforms/
+transcripts/
+analysis/
+audio/
+proxies/
+recovery/
+*.tmp
+*.savana

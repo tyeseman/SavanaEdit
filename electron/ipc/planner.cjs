@@ -1,0 +1,3 @@
+const {ipcMain}=require('electron');const {EditPlanner}=require('../services/ai/EditPlanner.cjs');
+function registerPlannerIpc(app,getItems){const planner=new EditPlanner(app,getItems);ipcMain.handle('planner:generate',(_event,input)=>{if(!input||typeof input.prompt!=='string'||input.prompt.length>5000)throw new Error('A valid edit prompt is required.');return planner.generate({prompt:input.prompt,mode:input.mode||'Custom',targetDuration:Number(input.targetDuration)||30,aspectRatio:input.aspectRatio||'16:9',projectName:String(input.projectName||'Untitled Project')})});ipcMain.handle('planner:validate',(_event,plan)=>planner.validate(plan))}
+module.exports={registerPlannerIpc};

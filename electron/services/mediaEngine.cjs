@@ -1,0 +1,10 @@
+const fs=require('node:fs/promises');const path=require('node:path');const {execFile}=require('node:child_process');const {promisify}=require('node:util');const run=promisify(execFile);
+let custom={};
+function candidates(app,name){const exe=process.platform==='win32'?`${name}.exe`:name;const envName=name==='ffmpeg'?'SAVANAEDIT_FFMPEG_PATH':'SAVANAEDIT_FFPROBE_PATH';return[
+ {value:custom[name],source:'custom'},{value:process.env[envName],source:'environment'},{value:path.join(process.resourcesPath||'', 'ffmpeg',process.platform,exe),source:'bundled'},{value:path.join(app.getAppPath(),'resources','ffmpeg',process.platform,exe),source:'bundled'},
+ ...(process.platform==='win32'?[{value:`C:\\ffmpeg\\bin\\${exe}`,source:'common-location'},{value:`C:\\Program Files\\ffmpeg\\bin\\${exe}`,source:'common-location'}]:[]),{value:name,source:'system-path'}].filter(x=>x.value)}
+async function detectOne(app,name){for(const entry of candidates(app,name)){if(entry.value!==name){try{await fs.access(entry.value)}catch{continue}}try{const {stdout}=await run(entry.value,['-version'],{timeout:5000});return{available:true,path:entry.value,version:stdout.split(/\r?\n/)[0],source:entry.source}}catch{}}return{available:false,source:'not-found'}}
+async function status(app){const [ffmpeg,ffprobe]=await Promise.all([detectOne(app,'ffmpeg'),detectOne(app,'ffprobe')]);return{ffmpegAvailable:ffmpeg.available,ffprobeAvailable:ffprobe.available,ffmpegPath:ffmpeg.path,ffprobePath:ffprobe.path,ffmpegVersion:ffmpeg.version,ffprobeVersion:ffprobe.version,ffmpegSource:ffmpeg.source,ffprobeSource:ffprobe.source,source:ffmpeg.source===ffprobe.source?ffmpeg.source:'mixed'}}
+async function resolve(app,name){const found=await detectOne(app,name);if(!found.available)throw new Error(`${name} was not found. Configure it in Preferences.`);return found.path}
+function setCustom(next){custom={ffmpeg:next?.ffmpegPath||undefined,ffprobe:next?.ffprobePath||undefined}}function getCustom(){return{ffmpegPath:custom.ffmpeg,ffprobePath:custom.ffprobe}}
+module.exports={status,resolve,setCustom,getCustom};

@@ -1,0 +1,1 @@
+export const secondsToFrames=(seconds:number,fps:number)=>Math.round(seconds*fps);export const framesToSeconds=(frames:number,fps:number)=>frames/fps;export const snapTimeToFrame=(seconds:number,fps:number)=>framesToSeconds(secondsToFrames(seconds,fps),fps);
