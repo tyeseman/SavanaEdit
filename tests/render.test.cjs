@@ -1,0 +1,5 @@
+const test=require('node:test');const assert=require('node:assert/strict');const{validateRequest}=require('../electron/services/render.cjs');
+const settings={format:'mp4-h264',width:1920,height:1080,fps:30,quality:18,audioBitrate:192};
+test('export validation accepts approved timeline sources',()=>{const file='C:\\media\\approved.mp4',request={settings,composition:{durationInFrames:30,fps:30,clips:[{id:'c1',mediaId:'m1',name:'Approved',src:'file:///C%3A/media/approved.mp4'}]}};assert.equal(validateRequest(request,[{id:'m1',path:file}]).props.clips.length,1)});
+test('export validation rejects renderer-supplied arbitrary paths',()=>{const request={settings,composition:{durationInFrames:30,fps:30,clips:[{id:'c1',mediaId:'m1',name:'Private',src:'file:///C%3A/private/secret.mp4'}]}};assert.throws(()=>validateRequest(request,[{id:'m1',path:'C:\\media\\approved.mp4'}]),/not approved/)});
+test('export validation rejects invalid dimensions atomically',()=>{assert.throws(()=>validateRequest({settings:{...settings,width:0},composition:{durationInFrames:30,clips:[]}},[]),/width/)});

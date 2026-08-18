@@ -1,65 +1,66 @@
 # SavanaEdit Help
 
-SavanaEdit is a local-first desktop video editor under active development. It combines traditional non-destructive timeline editing with optional media analysis and AI-assisted rough-cut planning. Original media files are referenced, never modified.
+SavanaEdit is a local-first, non-destructive desktop editor. It references original media and stores editing decisions separately. The application is under active development.
 
-## Getting started
+## Getting started and projects
 
-Install Node.js, FFmpeg, and FFprobe. Run `npm install`, then `npm run dev`. If SavanaEdit cannot detect FFmpeg, open **Edit → Preferences** and browse to both executables.
+Install system FFmpeg and FFprobe, run `npm install`, then `npm run dev`. Configure custom media-engine paths under **Edit → Preferences** when needed.
 
-## Projects and media
+Use the File menu to create, open, save, or save a copy of a project. Import files or folders from File or the Media panel. SavanaEdit projects store source references, timeline data, creative settings, and AI history; they do not embed footage.
 
-Use **File → New Project**, **Open Project**, **Save Project**, or **Save Project As**. Import individual media files or recursively scan a folder from the File menu or Project Media panel. You can also drag media from Explorer into Project Media, then drag a card onto V1 or V2.
+## Analysis, transcription, and AI Edit
 
-Project files contain media references, timeline edits, format settings, and AI edit history. They do not contain copied footage.
+Select a media card and use **Project → Analyze Selected Media**, or analyze all media. Analysis can generate scenes, silence ranges, loudness, waveform peaks, summaries, and optional transcripts. Transcription requires `SAVANAEDIT_OPENAI_API_KEY`.
 
-## Media analysis and transcription
-
-Double-click a media card or use **Project → Analyze Selected Media**. Analyze All processes clips through a controlled background queue. Analysis detects scenes, silence, loudness, waveform peaks, and—when `SAVANAEDIT_OPENAI_API_KEY` is configured—speech transcripts.
-
-Select **Transcripts** in the sidebar to search timestamped speech. Clicking a segment seeks Source Preview. **Add to timeline** inserts that exact source range. **Delete from timeline** removes every matching timeline range as one undoable edit and respects the Ripple toggle.
-
-## AI Edit
-
-Open **Assistant**, choose a strategy, duration, and aspect ratio, then enter an editing instruction. SavanaEdit retrieves only existing analyzed media and creates a structured plan. Review the duration, selected clips, and warnings before applying it. Cloud planning is optional; a deterministic local planner remains available.
+The Assistant creates source-grounded rough-cut plans using analyzed media. Review every plan before applying it. Creative AI operations are not yet available.
 
 ## Timeline editing
 
-- Drag clips horizontally or between compatible video tracks.
-- Drag either clip edge to trim. Source limits are enforced.
-- Click a clip to select it; Shift-click adds to the selection.
-- Press Ctrl+B to split selected clips at the playhead.
-- Press Delete to remove selected references.
-- Enable Ripple to close gaps after supported deletes.
-- Use Copy/Paste to duplicate timeline references at the playhead.
+Drag media to V1 or V2. Select timeline clips to move, trim, split, delete, ripple-delete, or copy/paste. V1 and A1 reject destructive same-track overlap; V2 supports B-roll over V1. Linked video/audio move and trim together.
 
-V1 and A1 are exclusive tracks and reject overlaps. V2 is an overlay/B-roll track and may overlap V1. Linked V1/A1 clips move and trim together.
+Use **S** or the magnet control to toggle pixel-aware snapping. Green guides indicate clip edges, the playhead, or timeline start. Zoom controls change the timeline scale; Fit shows the full sequence.
 
-## Snapping and zoom
+## Transcript editing and captions
 
-The magnet button or **S** toggles snapping. Clips and trim edges snap to the playhead, timeline start, and other clip boundaries using a pixel-based tolerance. A green guide shows the active snap target. Use the zoom slider, plus/minus buttons, or Fit Timeline control.
+Select analyzed media and open Transcripts. Segment clicks seek the source. Add a segment to the timeline or remove its mapped source range without modifying the original. **Generate Captions** creates timeline captions only where that source appears on V1, preserving edits and reordering.
 
-## Remove Silence
+## Remove Silence and waveforms
 
-Analyze a clip, select it, then choose **Project → Remove Silence**. Configure minimum duration, speech-safe padding, and ripple behavior. SavanaEdit merges near-adjacent ranges and previews the estimated removal before applying one undoable transaction.
+Choose **Project → Remove Silence**, configure minimum duration and speech-safe padding, preview the estimate, and apply one undoable transaction. Cached normalized waveform peaks render only the source range used by each audio clip.
 
-## Waveforms and preview
+## Creative library and Inspector
 
-Compact normalized waveform peaks are generated into SavanaEdit's cache and reused with cached analysis. Audio clips display the portion corresponding to their source in/out range.
+Effects contains implemented clip effects, procedural overlays, light leaks, and titles. Transitions contains four implemented transition types. Select a clip before adding clip effects or transitions. Overlays and titles are placed at the playhead.
 
-Source Preview plays the selected media item. Program Preview follows the timeline, choosing V2 over V1 when B-roll is active. Space toggles playback; the ruler and scrubber seek.
+Open Inspector to adjust position, scale, rotation, opacity, effect parameters, enable/disable state, and removal. Creative changes are non-destructive and stored with the project.
 
-## Undo, redo, and saving
+## Audio
 
-Undo and redo cover timeline transactions during the current session. Autosave runs shortly after meaningful changes. Save As creates a portable `.savana` project-reference file. Source media must remain at its original location.
+Select a clip and open Audio to set volume, gain, pan metadata, fade-in, fade-out, or mute. Volume, gain, fades, and mute are rendered. Pan, normalization, ducking, EQ, compression, filters, and noise reduction are not rendered yet.
+
+## Program Preview
+
+Source Preview displays selected media. Program Preview runs the shared Remotion composition and displays cuts, track layering, transforms, supported effects/transitions, procedural overlays, captions, titles, and rendered audio. Choose Draft, Preview, or Full quality; expensive quality reductions are not yet fully differentiated.
+
+## Export
+
+Click Export or choose **File → Export**. Select a preset or custom dimensions, FPS, format, CRF quality, audio bitrate, and filename. SavanaEdit asks for a destination, bundles the Remotion composition, renders outside the React renderer, reports progress, and supports cancellation.
+
+After rendering, SavanaEdit parses the file and verifies readable video, expected dimensions, and reasonable duration. Available formats are H.264 MP4, H.265 MP4, and VP9 WebM. Current rendering is software-based; hardware encoder selection is unavailable.
+
+## Saving, undo, and recovery
+
+Timeline edits are undoable during the session. Autosave includes creative items. Save As creates a `.savana` project-reference file. Missing source files are marked unavailable instead of crashing, but a relink workflow is future work.
 
 ## Troubleshooting
 
-- **Media engine not found:** configure paths in Preferences or set `SAVANAEDIT_FFMPEG_PATH` and `SAVANAEDIT_FFPROBE_PATH`.
-- **Transcript missing:** configure `SAVANAEDIT_OPENAI_API_KEY`, then analyze the clip again after clearing stale analysis if necessary.
-- **Media missing after restart:** restore the source file to its prior path or reimport it.
-- **Waveform missing:** confirm the clip has audio and FFmpeg analysis completed.
-- **AI plan has few clips:** analyze more media so scene and transcript evidence exists.
+- **Media engine not found:** configure system FFmpeg and FFprobe in Preferences.
+- **First export is slow:** Remotion may prepare its managed browser once.
+- **Export source unavailable:** restore or reimport the missing source file.
+- **No captions:** analyze and transcribe the selected source, then place it on V1.
+- **Effect Add disabled:** select a timeline clip first.
+- **Large production bundle warning:** Program Preview is currently eagerly bundled; this is known.
 
 ## Known limitations
 
-Final rendering/export, advanced transitions, effects, color grading, keyframes, automatic reframing, multicam, and advanced audio mixing are not implemented yet. Program Preview is an HTML5 rough-cut preview rather than a final render.
+Creative asset packs, beat detection, music ducking, creative AI planning, full keyframe authoring, proxies UI, hardware encoding, automatic reframing, advanced effects/audio, and relinking are not implemented. See README for the complete current boundary.

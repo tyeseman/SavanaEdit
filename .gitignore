@@ -21,3 +21,13 @@ proxies/
 recovery/
 *.tmp
 *.savana
+# Never commit imported footage, audio, or local render outputs.
+*.mp4
+*.mov
+*.m4v
+*.mkv
+*.avi
+*.webm
+*.wav
+*.mp3
+renders/

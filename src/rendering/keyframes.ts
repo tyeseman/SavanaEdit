@@ -1,0 +1,3 @@
+import type { Keyframe } from '../types/creative';
+const curve=(t:number,kind:Keyframe['interpolation'])=>kind==='linear'?t:kind==='ease-in'?t*t:kind==='ease-out'?1-(1-t)*(1-t):t*t*(3-2*t);
+export function interpolateKeyframes(frames:Keyframe[]|undefined,time:number,fallback:number){if(!frames?.length)return fallback;const sorted=[...frames].sort((a,b)=>a.time-b.time);if(time<=sorted[0].time)return Number(sorted[0].value);if(time>=sorted.at(-1)!.time)return Number(sorted.at(-1)!.value);const right=sorted.findIndex(frame=>frame.time>=time),a=sorted[right-1],b=sorted[right],progress=curve((time-a.time)/(b.time-a.time),b.interpolation);return Number(a.value)+(Number(b.value)-Number(a.value))*progress;}

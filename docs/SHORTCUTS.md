@@ -17,4 +17,6 @@
 | Left / Right | Move playhead by one project frame |
 | Shift+Click | Add a timeline clip to selection |
 
+Export and creative controls currently use menus and panels; no additional Step 5 keyboard shortcuts are assigned.
+
 Shortcuts are ignored while typing in a text field, prompt, or settings control.

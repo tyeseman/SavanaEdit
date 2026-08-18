@@ -4,6 +4,7 @@ const { pathToFileURL } = require('node:url');
 const { registerMediaIpc, resolveMedia, registerAsset, getItem, getItems } = require('./ipc/media.cjs');
 const { registerAnalysisIpc } = require('./ipc/analysis.cjs');
 const { registerPlannerIpc } = require('./ipc/planner.cjs');
+const { registerRenderIpc } = require('./ipc/render.cjs');
 const ffmpeg = require('./services/ffmpeg.cjs');
 const settings = require('./services/settings.cjs'); const mediaEngine = require('./services/mediaEngine.cjs');
 
@@ -31,6 +32,7 @@ app.whenReady().then(async () => {
   registerMediaIpc();
   registerAnalysisIpc(app,getItem,getItems,registerAsset);
   registerPlannerIpc(app,getItems);
+  registerRenderIpc(app,getItems);
   ipcMain.handle('app:open-link',async(_event,url)=>{const allowed=new Set(['https://github.com/tyeseman/SavanaEdit/blob/main/docs/HELP.md','https://github.com/tyeseman/SavanaEdit/blob/main/docs/SHORTCUTS.md','https://github.com/tyeseman/SavanaEdit/issues/new']);if(!allowed.has(url))throw new Error('URL is not approved.');await shell.openExternal(url)});
   ipcMain.handle('app:about',()=>dialog.showMessageBox({type:'info',title:'About SavanaEdit',message:'SavanaEdit',detail:`Version ${app.getVersion()}\nLocal-first AI-assisted desktop video editor.\nhttps://github.com/tyeseman/SavanaEdit`,buttons:['OK']}));
   ipcMain.handle('app:exit',()=>app.quit());
