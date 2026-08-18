@@ -1,0 +1,4 @@
+import { create } from 'zustand';
+import { snapTimeToFrame } from '../utils/time';
+interface TransportState { currentTime:number;playing:boolean;playbackRate:number;loop:boolean;setCurrentTime:(time:number,fps?:number)=>void;setPlaying:(playing:boolean)=>void;togglePlaying:()=>void;setPlaybackRate:(rate:number)=>void;setLoop:(loop:boolean)=>void;reset:()=>void }
+export const useTransportStore=create<TransportState>(set=>({currentTime:0,playing:false,playbackRate:1,loop:false,setCurrentTime:(time,fps=30)=>set({currentTime:snapTimeToFrame(Math.max(0,time),fps)}),setPlaying:playing=>set({playing}),togglePlaying:()=>set(state=>({playing:!state.playing})),setPlaybackRate:playbackRate=>set({playbackRate:Math.max(.25,Math.min(4,playbackRate))}),setLoop:loop=>set({loop}),reset:()=>set({currentTime:0,playing:false,playbackRate:1,loop:false})}));

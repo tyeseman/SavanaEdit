@@ -1,0 +1,5 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+const read=file=>fs.readFileSync(path.join(__dirname,'..',file),'utf8');
+test('interactive preview is independent from Remotion Player',()=>{const source=read('src/components/PreviewPanel/PreviewPanel.tsx');assert.doesNotMatch(source,/@remotion\/player/);assert.match(source,/resolveTimeline/);assert.match(source,/useTransportStore/)});
+test('playback transport does not structurally update TimelineModel',()=>{const source=read('src/stores/timelineStore.ts');assert.match(source,/setPlayhead:playhead=>useTransportStore/);assert.doesNotMatch(source,/setPlayhead:playhead=>set\(/)});
+test('dynamic track architecture supports professional track types',()=>{const source=read('src/types/timeline.ts');for(const type of['video','audio','overlay','text','graphics','adjustment'])assert.match(source,new RegExp(`'${type}'`));const store=read('src/stores/timelineStore.ts');assert.match(store,/addTrack:type=>/);assert.match(store,/deleteTrack:id=>/)});
