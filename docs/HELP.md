@@ -1,5 +1,11 @@
 # SavanaEdit Help
 
+## Media engine
+
+FFmpeg and FFprobe are bundled with SavanaEdit. A separate FFmpeg installation is normally not required. SavanaEdit verifies both executables by running their `-version` commands before reporting them ready. **Edit → Preferences** shows `Bundled — Ready` during normal operation and retains path fields only as advanced overrides if the bundled files cannot execute.
+
+Advanced users may also set `SAVANAEDIT_FFMPEG_PATH` and `SAVANAEDIT_FFPROBE_PATH`. Invalid overrides do not crash the editor; SavanaEdit continues through its bundled, system-PATH, and common-location fallbacks.
+
 SavanaEdit is a local-first, non-destructive desktop editor. It references original media and stores editing decisions separately. The application is under active development.
 
 ## Getting started and projects

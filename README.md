@@ -11,12 +11,13 @@ This does not yet implement the entire long-term Step 5 vision. See Known limita
 ## Implemented features
 
 - Imports common professional and phone media, including MOV, MP4, M4V, and HEVC/H.265 where FFmpeg can decode them.
-- Calls system-installed FFmpeg/FFprobe directly from Electron with `child_process`; originals are never modified.
+- FFmpeg and FFprobe are bundled with SavanaEdit. A separate FFmpeg installation is normally not required.
+- Calls the resolved FFmpeg/FFprobe executables directly from Electron with `child_process`; originals are never modified.
 - Generates compatibility proxies, thumbnails, scenes, silence/loudness data, transcripts, summaries, and cached waveform peaks.
 - Supports V2/V1/A1 timeline editing, linked A/V, snapping, trim, split, move, ripple delete, copy/paste, undo/redo, and autosave.
 - Provides transcript-driven timeline cuts and automatic caption generation from mapped transcript segments.
 - Uses the SavanaEdit timeline as the authority and translates it through an isolated Remotion composition adapter.
-- Includes 4 transition implementations, 7 clip effects, 11 procedural overlays including 8 light-leak variants, 2 caption presets, and 1 title preset.
+- Includes 18 renderer-backed transitions, 13 clip effects, 11 procedural overlays including 8 light-leak variants, 2 caption presets, and 1 title preset.
 - Provides Inspector transform/effect controls and clip audio volume, gain, fade-in, fade-out, and mute controls.
 - Program Preview uses the same Remotion composition component as export.
 - Exports H.264 MP4, H.265 MP4, or VP9 WebM with presets and cancellable progress in the Electron main process.
@@ -26,7 +27,7 @@ This does not yet implement the entire long-term Step 5 vision. See Known limita
 
 - Windows is the current primary target
 - Node.js 20 or newer and npm
-- System FFmpeg and FFprobe on `PATH`, or configured executable paths, for ingestion and analysis
+- No separate FFmpeg installation is required; bundled executables handle ingestion and analysis
 - Network access on first Remotion render if its managed browser is not cached
 
 ## Install and run
@@ -45,15 +46,15 @@ npm test          Run automated tests
 
 ## Environment
 
-Copy `.env.example` if environment-based configuration is needed:
+Copy `.env.example` to `.env`, then add the key without quotes:
 
 ```text
-SAVANAEDIT_FFMPEG_PATH
-SAVANAEDIT_FFPROBE_PATH
-SAVANAEDIT_OPENAI_API_KEY
+SAVANAEDIT_OPENAI_API_KEY=sk-your-key-here
 ```
 
-API keys stay in the Electron main process and are not saved in projects. The OpenAI provider is optional; deterministic local rough-cut planning remains available.
+`OPENAI_API_KEY` is accepted as an alternative. Restart SavanaEdit after changing the environment. API keys stay in the Electron main process, `.env` is gitignored, and keys are never saved in projects or exposed through the renderer bridge. The OpenAI provider is optional; deterministic local rough-cut planning remains available.
+
+`SAVANAEDIT_FFMPEG_PATH` and `SAVANAEDIT_FFPROBE_PATH` remain optional advanced overrides. Preferences overrides take priority, followed by these environment variables, bundled binaries, system `PATH`, and common OS locations.
 
 ## Architecture
 

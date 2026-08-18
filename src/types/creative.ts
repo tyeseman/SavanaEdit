@@ -5,7 +5,7 @@ export interface TransformSettings { positionX: number; positionY: number; scale
 export interface TransitionInstance { id: string; transitionId: string; duration: number; parameters: Record<string, number | string | boolean> }
 export type BlendMode = 'normal'|'screen'|'plus-lighter'|'multiply'|'overlay'|'soft-light'|'hard-light'|'lighten'|'darken'|'color-dodge'|'color-burn'|'difference';
 export interface OverlayItem { id: string; overlayId: string; timelineStart: number; duration: number; parameters: Record<string, number | string | boolean>; blendMode: BlendMode; assetPath?: string }
-export interface CaptionItem { id: string; presetId: string; text: string; timelineStart: number; duration: number; words?: { text: string; start: number; end: number }[] }
+export interface CaptionItem { id: string; presetId: string; text: string; timelineStart: number; duration: number; sourceMediaId?: string; words?: { text: string; start: number; end: number }[] }
 export interface TitleItem { id: string; presetId: string; text: string; subtitle?: string; timelineStart: number; duration: number; parameters: Record<string, number | string | boolean> }
 export interface AudioSettings { volume: number; muted: boolean; fadeIn: number; fadeOut: number; gainDb: number; pan: number; normalize: boolean; ducking?: { enabled: boolean; amountDb: number; attack: number; release: number } }
 export interface CreativeState { overlays: OverlayItem[]; captions: CaptionItem[]; titles: TitleItem[]; favoriteIds: string[]; recentIds: string[]; previewQuality: 'draft'|'preview'|'full' }

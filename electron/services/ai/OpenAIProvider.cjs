@@ -1,3 +1,22 @@
-const fs=require('node:fs');
-class OpenAIProvider{constructor(apiKey=process.env.SAVANAEDIT_OPENAI_API_KEY){this.apiKey=apiKey}configured(){return Boolean(this.apiKey)}async transcribe({audioPath,mediaId,duration}){if(!this.apiKey)throw new Error('OpenAI transcription is not configured. Set SAVANAEDIT_OPENAI_API_KEY.');const form=new FormData();form.append('file',await fs.openAsBlob(audioPath),require('node:path').basename(audioPath));form.append('model','whisper-1');form.append('response_format','verbose_json');form.append('timestamp_granularities[]','segment');const response=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:`Bearer ${this.apiKey}`},body:form});if(!response.ok)throw new Error(`OpenAI transcription failed (${response.status}).`);const data=await response.json();const segments=(data.segments||[]).map((segment,index)=>({id:`${mediaId}-t${index}`,start:Number(segment.start||0),end:Number(segment.end||0),text:String(segment.text||'').trim(),words:segment.words}));return{mediaId,language:data.language,duration:Number(data.duration||duration),segments,fullText:String(data.text||segments.map(x=>x.text).join(' ')),provider:'openai:whisper-1',createdAt:new Date().toISOString()}}}
-module.exports={OpenAIProvider};
+const fs = require('node:fs');
+const path = require('node:path');
+const { getOpenAIKey } = require('../openaiConfig.cjs');
+
+class OpenAIProvider {
+  constructor(apiKey = getOpenAIKey()) { this.apiKey = apiKey; }
+  configured() { return Boolean(this.apiKey); }
+  async transcribe({ audioPath, mediaId, duration }) {
+    if (!this.apiKey) throw new Error('OpenAI transcription is not configured. Set SAVANAEDIT_OPENAI_API_KEY or OPENAI_API_KEY.');
+    const form = new FormData();
+    form.append('file', await fs.openAsBlob(audioPath), path.basename(audioPath));
+    form.append('model', 'whisper-1');
+    form.append('response_format', 'verbose_json');
+    form.append('timestamp_granularities[]', 'segment');
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', { method: 'POST', headers: { Authorization: `Bearer ${this.apiKey}` }, body: form });
+    if (!response.ok) throw new Error(`OpenAI transcription failed (${response.status}).`);
+    const data = await response.json();
+    const segments = (data.segments || []).map((segment, index) => ({ id: `${mediaId}-t${index}`, start: Number(segment.start || 0), end: Number(segment.end || 0), text: String(segment.text || '').trim(), words: segment.words }));
+    return { mediaId, language: data.language, duration: Number(data.duration || duration), segments, fullText: String(data.text || segments.map(x => x.text).join(' ')), provider: 'openai:whisper-1', createdAt: new Date().toISOString() };
+  }
+}
+module.exports = { OpenAIProvider };

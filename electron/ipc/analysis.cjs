@@ -1,3 +1,23 @@
-const {dialog,ipcMain}=require('electron');const path=require('node:path');const settings=require('../services/settings.cjs');const engine=require('../services/mediaEngine.cjs');const {AnalysisQueue}=require('../services/analysisQueue.cjs');
-function registerAnalysisIpc(app,getItem,getItems,registerAsset){const queue=new AnalysisQueue(app,getItem,registerAsset);ipcMain.handle('analysis:start',(event,ids)=>queue.enqueue(Array.isArray(ids)?ids.filter(id=>typeof id==='string'&&getItem(id)):[],event.sender));ipcMain.handle('analysis:all',event=>queue.enqueue(getItems().map(item=>item.id),event.sender));ipcMain.handle('analysis:cancel',(_event,id)=>queue.cancel(String(id)));ipcMain.handle('analysis:get',async(_event,id)=>{const item=getItem(String(id));return item?queue.repo.load(item):null});ipcMain.handle('settings:get',async()=>{const value=await settings.load(app);engine.setCustom(value);return{...value,openAIConfigured:Boolean(process.env.SAVANAEDIT_OPENAI_API_KEY),mediaEngine:await engine.status(app)}});ipcMain.handle('settings:save',async(_event,value)=>{const saved=await settings.save(app,value);engine.setCustom(saved);return{...saved,openAIConfigured:Boolean(process.env.SAVANAEDIT_OPENAI_API_KEY),mediaEngine:await engine.status(app)}});ipcMain.handle('settings:browse',async(_event,kind)=>{if(!['ffmpeg','ffprobe'].includes(kind))throw new Error('Invalid engine type.');const result=await dialog.showOpenDialog({properties:['openFile'],filters:[{name:kind,extensions:process.platform==='win32'?['exe']:['*']}]});return result.canceled?'':path.resolve(result.filePaths[0])})}
-module.exports={registerAnalysisIpc};
+const { dialog, ipcMain } = require('electron');
+const path = require('node:path');
+const settings = require('../services/settings.cjs');
+const engine = require('../services/mediaEngine.cjs');
+const { AnalysisQueue } = require('../services/analysisQueue.cjs');
+const { isOpenAIConfigured, testOpenAIConnection } = require('../services/openaiConfig.cjs');
+
+function registerAnalysisIpc(app, getItem, getItems, registerAsset) {
+  const queue = new AnalysisQueue(app, getItem, registerAsset);
+  ipcMain.handle('analysis:start', (event, ids) => queue.enqueue(Array.isArray(ids) ? ids.filter(id => typeof id === 'string' && getItem(id)) : [], event.sender));
+  ipcMain.handle('analysis:all', event => queue.enqueue(getItems().map(item => item.id), event.sender));
+  ipcMain.handle('analysis:cancel', (_event, id) => queue.cancel(String(id)));
+  ipcMain.handle('analysis:get', async (_event, id) => { const item = getItem(String(id)); return item ? queue.repo.load(item) : null; });
+  ipcMain.handle('settings:get', async () => { const value = await settings.load(app); engine.setCustom(value); return { ...value, openAIConfigured: isOpenAIConfigured(), mediaEngine: await engine.status(app) }; });
+  ipcMain.handle('settings:save', async (_event, value) => { const saved = await settings.save(app, value); engine.setCustom(saved); return { ...saved, openAIConfigured: isOpenAIConfigured(), mediaEngine: await engine.status(app) }; });
+  ipcMain.handle('settings:test-openai', () => testOpenAIConnection());
+  ipcMain.handle('settings:browse', async (_event, kind) => {
+    if (!['ffmpeg', 'ffprobe'].includes(kind)) throw new Error('Invalid engine type.');
+    const result = await dialog.showOpenDialog({ properties: ['openFile'], filters: [{ name: kind, extensions: process.platform === 'win32' ? ['exe'] : ['*'] }] });
+    return result.canceled ? '' : path.resolve(result.filePaths[0]);
+  });
+}
+module.exports = { registerAnalysisIpc };

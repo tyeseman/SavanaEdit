@@ -1,5 +1,7 @@
 const { app, BrowserWindow, protocol, net, shell, dialog, ipcMain } = require('electron');
 const path = require('node:path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
+if (!process.env.SAVANAEDIT_OPENAI_API_KEY && process.env.OPENAI_API_KEY) process.env.SAVANAEDIT_OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const { pathToFileURL } = require('node:url');
 const { registerMediaIpc, resolveMedia, registerAsset, getItem, getItems } = require('./ipc/media.cjs');
 const { registerAnalysisIpc } = require('./ipc/analysis.cjs');
